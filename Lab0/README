@@ -1,0 +1,48 @@
+NAME: Devyan Biswas
+EMAIL: devyanbiswas@outlook.com
+ID: 804988161
+
+Sources:
+POSIX
+CS35L
+http://www.tutorialspoint.com/ansi_c/c_strerror.htm
+https://www.gnu.org/software/libc/manual/html_node/Getopt-Long-Option-Example.html
+http://pubs.opengroup.org/onlinepubs/009695399/functions/getopt.html
+https://linux.die.net/man/3/getopt_long
+https://www.ibm.com/developerworks/community/blogs/58e72888-6340-46ac-b488-d31aa4058e9c/entry/understanding_linux_open_system_call?lang=en
+https://linux.die.net/man/2/dup
+https://www.geeksforgeeks.org/core-dump-segmentation-fault-c-cpp/
+https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.3.0/com.ibm.zos.v2r3.bpxbd00/rtcre.htm
+https://stackoverflow.com/questions/19769542/reading-from-file-using-read-function
+http://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/
+https://stackoverflow.com/questions/20121805/shell-conditional-in-makefile
+https://www.dummies.com/computers/operating-systems/linux/linux-how-to-run-make/
+http://man7.org/linux/man-pages/man7/signal.7.html
+http://www.yolinux.com/TUTORIALS/C++Signals.html
+http://man7.org/linux/man-pages/man2/signal.2.html
+
+File Descriptions:
+lab0.c: A program that copies its standard input to its standard output by reading from file descriptor 0 (until encountering an end of file) and writing to file descriptor 1. Allowing for following parameters (taken from spec):
+--input=filename ... use the specified file as standard input (instead of what is already being used as standard input) 
+If you are unable to open the specified input file, report the failure (on stderr, file descriptor 2) using fprintf(3), and exit(2) with status 1.
+--output=filename ... create the specified file and use it as standard output (instead of whatever is already being used as standard output) 
+If the file already exists, truncate it to zero size. If you are unable to create or truncate the specified output file, report the failure (on stderr, file descriptor 2) using fprintf(3), and exit(2) with status 2.
+--segfault ... force a segmentation fault (e.g., by calling a subroutine that sets a char * pointer to NULL and then stores through the null pointer). If this argument is specified, do it immediately, and do not copy from stdin to stdout.
+--catch ... use signal(2) to register a SIGSEGV handler that catches the segmentation fault, logs an error message (on stderr, file descriptor 2) and exit(2) with status 4.
+--dump-core ... dump core on segmentation faults
+
+backtrace.png: Image of stack backtrace with segfault flag
+
+breakpoint.png: Image of breakpoint at segfault location with segfault flag
+
+Makefile: Makefile for compilation, smoke testing, dist for tar, and cleanup
+
+Smoke Tests: 
+catch and segfault,
+Bad argument,
+dumpcore and segfault,
+input and output,
+input,
+output
+
+Version for GITHUB

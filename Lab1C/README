@@ -1,0 +1,20 @@
+NAME: DEVYAN BISWAS
+EMAIL: devyanbiswas@outlook.com
+ID: 804988161
+
+*DISCLAIMER*: This is some of the ugliest code I've ever written, but I finally get it, and I finally finished!
+
+General function of the code is to be another shell that you can pass arguments to that will specify file behavior regarding 
+stdin, stdout, and stderr. The --rdonly flag specified the file to be read from, --wronly to be read from, --verbose to print all following commands, and
+--command to use a shell command to operate on the stdin, stdout, and stderr specified (or not; in that case default).
+
+There are also other flags that specify behavior of the shell, such as wait, ignore, etc...
+
+ The process array is dynamically allocated as is the file descriptor array to allow for future 
+changes and additions to the code, ie robustness.
+
+The main issue is legibility, and of course it is not as robust as it could be.
+
+Makefile allows for a fundamental check of read only, write only, verbose, and command flags.
+
+The report contains timing information for the bash v. dash v. simpsh tests.
