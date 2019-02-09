@@ -1,6 +1,6 @@
 #NAME: Devyan Biswas
 #EMAIL: devyanbiswas@outlook.com
-#ID: 804988161
+#ID: #UID
 
 .SILENT:
 
@@ -9,12 +9,12 @@ default: simpsh.c
 
 clean:
 	rm -f simpsh *.o *.tar.gz *~
-	rm -r 804988161
+	rm -r #UID
 
 check:  default inputCheck verboseCheck outputCheck commCheck
 
 dist:
-	tar -czvf lab1-804988161.tar.gz simpsh.c Makefile README report.pdf
+	tar -czvf lab1-#UID.tar.gz simpsh.c Makefile README report.pdf
 
 inputCheck: 
 	touch readable.txt;

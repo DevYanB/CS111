@@ -1,6 +1,6 @@
 #NAME: Devyan Biswas
 #EMAIL: devyanbiswas@outlook.com
-#ID: 804988161
+#ID: #UID
 
 .SILENT:
 
@@ -13,7 +13,7 @@ clean:
 	rm -f *.tar.gz *.txt *.o lab0 check
 
 dist: default
-	tar -czvf lab0-804988161.tar.gz Makefile README lab0.c breakpoint.png backtrace.png \
+	tar -czvf lab0-#UID.tar.gz Makefile README lab0.c breakpoint.png backtrace.png \
 
 inAndOutTest:
 	@echo "Input Testing Info Dood" > input.txt;
