@@ -1,0 +1,55 @@
+NAME: Devyan Biswas
+EMAIL: devyanbiswas@outlook.com
+ID: #UID
+
+In general, add uses a protected add function with different options to showcase race conditions and locking mechanisms. Part 2 is along similar lines, by representing race conditions for complex data structures. SortedList.h and .c are what this is implemented by, and list is what maintains threads and performs operations on doubly linked list.
+--------------------------------------------------
+Question 2.1.1: 
+- Why does it take many iterations before errors are seen?
+- Why does a significantly smaller number of iterations so seldom fail?
+
+Answer:
+- Well, both questions have the same answer: for a smaller volume of iterations, the probability of running into conflicts is significantly lower, and the time to create a thread can be significantly less than the process of completion of the threads.
+--------------------------------------------------
+Question 2.1.2: 
+- Why are the --yield runs so much slower?
+Where is the additional time going?
+- Is it possible to get valid per-operation timings if we are using the --yield option?
+If so, explain how. If not, explain why not. 
+
+Answer:
+- The --yield runs call sched_yield(), which essentially performs a context switch from the current thread to another thread, putting the current thread at the back of a queue. Context switches from thread to thread take a lot of time.
+- No, the problem lies in the nature of the yield operation and the timing mechanism. Sicne we are only getting the wall time of each thread, and since we are also performing context switches between thread operations, it is difficult to tell how to allocate the time from context switch to or remove from the threads. Therefore, the time we get will be skewed due to this.
+--------------------------------------------------
+Question 2.1.3:
+- Why does the average cost per operation drop with increasing iterations?
+- If the cost per iteration is a function of the number of iterations, how do we know how many iterations to run (or what the "correct" cost is)?
+
+Answer:
+- For a thread, increasing the number of iterations reduces the overhead gained from having to perform context switches into new threads and making new threads.
+- Based on ther second plot, it is an exponentially decreasing graph for cost of operation per iteration. Therefore, the point at which the graph reaches the asymptote/stable state, that number would be the ideal number of iterations
+--------------------------------------------------
+Question 2.1.4:
+- Why do all of the options perform similarly for low numbers of threads?
+- Why do the three protected operations slow down as the number of threads rises?
+
+Answer:
+- Similarly to 2.1.1, if the number of threads is low, the probability of running into race conditions and conflicts is lower.
+- For more threads, there is a higher chance of race conditions, and as such higher time taken by locks and waiting on other threads to give up said locks.
+--------------------------------------------------
+Question 2.2.1 :
+- Compare the variation in time per mutex-protected operation vs the number of threads in Part-1 (adds) and Part-2 (sorted lists).
+- Comment on the general shapes of the curves, and explain why they have this shape.
+- Comment on the relative rates of increase and differences in the shapes of the curves, and offer an explanation for these differences.
+
+Answer:
+- Per operation costs tend to grow larger in Part 2, sicne the list operations are more complex than the basic add done in Part 1. 
+- Low thread and iteration operations tend to be similar, but with increasing iterations, cost per operations in part 1 go down exponentially, while they go down more linearly with part 2.
+- Generally speaking, linked list mutex locks were held longer. Additionally, as the threads increased, the cost of mutex-protected operations increased
+--------------------------------------------------
+Question 2.2.2:
+- Compare the variation in time per protected operation vs the number of threads for list operations protected by Mutex vs Spin locks. Comment on the general shapes of the curves, and explain why they have this shape.
+- Comment on the relative rates of increase and differences in the shapes of the curves, and offer an explanation for these differences.
+
+Answer:
+- With lower threads, spin lock tends to have a lower cost, and with higher number of threads spin lock has to keep ckecking before going into critical section. For mutex, threads are put to sleep when not run, so CPU time isnt used up. Spin locks alwasy check this, given by the name, so this wastes CPU time.
