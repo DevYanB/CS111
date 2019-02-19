@@ -1,0 +1,319 @@
+Total: 434 samples
+     309  71.2%  71.2%      434 100.0% pass_to_thread
+      99  22.8%  94.0%       99  22.8% __strcmp_sse42
+      15   3.5%  97.5%       53  12.2% SortedList_lookup
+      11   2.5% 100.0%       72  16.6% SortedList_insert
+       0   0.0% 100.0%      434 100.0% __clone
+       0   0.0% 100.0%      434 100.0% start_thread
+ROUTINE ====================== pass_to_thread in /u/cs/ugrad/devyan/CS111/2Lab/lab2_list.c
+   309    434 Total samples (flat / cumulative)
+     .      .   26:     str++;
+     .      .   27:   }
+     .      .   28:   return hash;
+     .      .   29: }
+     .      .   30: 
+---
+     .      .   31: void* pass_to_thread(void *arg){
+     .      .   32:   int* p_num = (int *) arg; //These 2 lines are the way of interpreting void pntr as int
+     .      .   33:   int t_num = *p_num;
+     .      .   34:   //int i; //gonna try a long for indexing lol
+     .      .   35:   long start = t_num * niter;
+     .      .   36:   long i;
+     .      .   37:   long end = start + niter;
+     .      .   38:   long m_time_cum = 0;
+     .      .   39:   //unsigned long hashing_index;
+     .      .   40: 
+     .      .   41:   struct timespec start_time;
+     .      .   42:   struct timespec end_time;
+     .      .   43:   for (i = start; i < end; i++){
+     .      .   44:     //mutex opt
+     .      .   45:     unsigned int hashing_index = hash((elems+i)->key) % nlists; //hash index according to each i
+     .      .   46:     if(opt_sync == 'm'){
+     .      .   47:       clock_gettime(CLOCK_MONOTONIC, &start_time); //starting timing
+     .      .   48:       pthread_mutex_lock(mutex + hashing_index); //dont need ptr & b/c mutex is array
+     .      .   49:       // hashing index for loc. of appropriate thd
+     .      .   50:       //SortedList_insert(top, (elems + i));
+     .      .   51:       //pthread_mutex_unlock(&mutex);
+     .      .   52:       clock_gettime(CLOCK_MONOTONIC, &end_time);
+     .      .   53:       m_time_cum += 1000000000L * (end_time.tv_sec - start_time.tv_sec) + end_time.tv_nsec - start_time.tv_nsec;
+     .      .   54:     }
+     .      .   55:     //sync opt
+     .      .   56:     else if(opt_sync == 's'){
+   201    201   57:       while(__sync_lock_test_and_set(lock + hashing_index, 1));
+     .      .   58:     }
+     .     72   59:     SortedList_insert(top + hashing_index, (elems + i));
+     .      .   60:     //__sync_lock_release(lock + hashing_index);
+     .      .   61:     if(opt_sync == 'm'){
+     .      .   62:       pthread_mutex_unlock(mutex + hashing_index);
+     .      .   63:     }
+     .      .   64:     else if(opt_sync == 's'){
+     .      .   65:       __sync_lock_release(lock + hashing_index);
+     .      .   66:     }
+     .      .   67:     //default
+     .      .   68:     /*   else{
+     .      .   69: 	 SortedList_insert(top, (elems+i)); 
+     .      .   70: 	 }*/
+     .      .   71:   }
+     .      .   72: 
+     .      .   73: 
+     .      .   74:   //locks for lists
+     .      .   75:   for(i = 0; i < nlists; i++){
+     .      .   76:     if(opt_sync == 'm'){
+     .      .   77:       clock_gettime(CLOCK_MONOTONIC,&start_time);
+     .      .   78:       pthread_mutex_lock(mutex + i);
+     .      .   79:       clock_gettime(CLOCK_MONOTONIC,&end_time);
+     .      .   80:       m_time_cum += 1000000000L * (end_time.tv_sec - start_time.tv_sec) + end_time.tv_nsec - start_time.tv_nsec;
+     .      .   81:     }
+     .      .   82:     else if(opt_sync == 's'){
+     .      .   83:       while(__sync_lock_test_and_set(lock + i, 1));
+     .      .   84:     }
+     .      .   85:   }
+     .      .   86: 
+     .      .   87:   long list_length = 0;  
+     .      .   88:   
+     .      .   89:   for(i = 0; i < nlists; i++){
+     .      .   90:     list_length += SortedList_length(top + i);
+     .      .   91:   }
+     .      .   92:   
+     .      .   93:   //lock list release boi
+     .      .   94:   for(i = 0; i < nlists; i++){
+     .      .   95:     if(opt_sync == 'm'){
+     .      .   96:       pthread_mutex_unlock(mutex + i);
+     .      .   97:     }
+     .      .   98:     else if(opt_sync == 's'){
+     .      .   99:       __sync_lock_release(lock + i);
+     .      .  100:     }
+     .      .  101:   }
+     .      .  102: 
+     .      .  103:   char* checker = malloc(sizeof(char) * 6); // CHANGE NUM
+     .      .  104:   //The lookup+delete
+     .      .  105:   SortedListElement_t *visited;
+     .      .  106:   int deleted;
+     .      .  107: 
+     .      .  108:   for (i = t_num * niter; i < end; i++)
+     .      .  109:     {
+     .      .  110:       unsigned int hashing_index = hash((elems+i)->key) % nlists;
+     .      .  111:       strcpy(checker, (elems+i)->key);
+     .      .  112:       // Mutex lock
+     .      .  113:       if (opt_sync == 'm'){
+     .      .  114: 	clock_gettime(CLOCK_MONOTONIC, &start_time);
+     .      .  115: 	pthread_mutex_lock(mutex + hashing_index);
+     .      .  116: 	//visited = SortedList_lookup(top, (elems + i)->key);
+     .      .  117: 	//pthread_mutex_unlock(&mutex);
+     .      .  118: 	//pthread_mutex_lock(muitex + hashing_index);
+     .      .  119: 	//deleted = SortedList_delete(visited);
+     .      .  120: 	//pthread_mutex_unlock(&mutex);
+     .      .  121: 	clock_gettime(CLOCK_MONOTONIC, &end_time);
+     .      .  122: 	m_time_cum += 1000000000L * (end_time.tv_sec - start_time.tv_sec) + end_time.tv_nsec - start_time.tv_nsec;
+     .      .  123:       }
+     .      .  124:       else if (opt_sync == 's'){
+   105    105  125: 	while (__sync_lock_test_and_set(lock + hashing_index, 1));
+     .      .  126:       }
+     .     53  127:       visited = SortedList_lookup(top + hashing_index, checker);
+     .      .  128:       
+     .      .  129:       if(opt_sync == 'm'){
+     .      .  130: 	pthread_mutex_unlock(mutex + hashing_index);
+     .      .  131:       }
+     .      .  132:       else if(opt_sync == 's'){
+     .      .  133: 	__sync_lock_release(lock + hashing_index);
+     .      .  134:       }
+     .      .  135:       /*__sync_lock_release(&lock);
+     .      .  136:         while (__sync_lock_test_and_set(&lock, 1));
+     .      .  137: 	deleted = SortedList_delete(visited);
+     .      .  138:         __sync_lock_release(&lock);
+     .      .  139: 	}
+     .      .  140:       else {
+     .      .  141:       visited = SortedList_lookup(top, (elems + i)->key);
+     .      .  142:       deleted = SortedList_delete(visited);
+     .      .  143:       }*/
+     .      .  144:       if(visited == NULL){
+     .      .  145: 	fprintf(stderr, "Error with looking at list\n");
+     .      .  146: 	exit(2);
+     .      .  147:       }
+     .      .  148: 
+     .      .  149:       if(opt_sync == 'm'){
+     .      .  150: 	clock_gettime(CLOCK_MONOTONIC, &start_time);
+     .      .  151: 	pthread_mutex_lock(mutex + hashing_index);
+     .      .  152: 	clock_gettime(CLOCK_MONOTONIC, &end_time);
+     .      .  153: 	m_time_cum += 1000000000L * (end_time.tv_sec - start_time.tv_sec) + end_time.tv_nsec - start_time.tv_nsec;
+     .      .  154:       }
+     .      .  155:       else if(opt_sync == 's'){
+     3      3  156: 	while(__sync_lock_test_and_set(lock + hashing_index, 1));
+     .      .  157:       }
+     .      .  158:       deleted = SortedList_delete(visited);
+     .      .  159: 
+     .      .  160:       if(opt_sync == 'm'){
+     .      .  161: 	pthread_mutex_unlock(mutex + hashing_index);
+     .      .  162:       }
+     .      .  163:       else if(opt_sync == 's'){
+     .      .  164: 	__sync_lock_release(lock + hashing_index);
+     .      .  165:       }
+     .      .  166:       if(deleted){
+     .      .  167: 	fprintf(stderr, "Error with deleting item from list\n");
+     .      .  168: 	exit(2);
+     .      .  169:       }
+     .      .  170:     }
+     .      .  171:   return (void *) m_time_cum;
+     .      .  172: }
+---
+     .      .  173: 
+     .      .  174: int main (int argc, char** argv)
+     .      .  175: {
+     .      .  176:   int opt = 0;    // Stores the options
+     .      .  177:   int num_threads = 1;
+ROUTINE ====================== pass_to_thread in /u/cs/ugrad/devyan/CS111/2Lab/lab2_list.c
+   309    434 Total samples (flat / cumulative)
+     .      .   26:     str++;
+     .      .   27:   }
+     .      .   28:   return hash;
+     .      .   29: }
+     .      .   30: 
+---
+     .      .   31: void* pass_to_thread(void *arg){
+     .      .   32:   int* p_num = (int *) arg; //These 2 lines are the way of interpreting void pntr as int
+     .      .   33:   int t_num = *p_num;
+     .      .   34:   //int i; //gonna try a long for indexing lol
+     .      .   35:   long start = t_num * niter;
+     .      .   36:   long i;
+     .      .   37:   long end = start + niter;
+     .      .   38:   long m_time_cum = 0;
+     .      .   39:   //unsigned long hashing_index;
+     .      .   40: 
+     .      .   41:   struct timespec start_time;
+     .      .   42:   struct timespec end_time;
+     .      .   43:   for (i = start; i < end; i++){
+     .      .   44:     //mutex opt
+     .      .   45:     unsigned int hashing_index = hash((elems+i)->key) % nlists; //hash index according to each i
+     .      .   46:     if(opt_sync == 'm'){
+     .      .   47:       clock_gettime(CLOCK_MONOTONIC, &start_time); //starting timing
+     .      .   48:       pthread_mutex_lock(mutex + hashing_index); //dont need ptr & b/c mutex is array
+     .      .   49:       // hashing index for loc. of appropriate thd
+     .      .   50:       //SortedList_insert(top, (elems + i));
+     .      .   51:       //pthread_mutex_unlock(&mutex);
+     .      .   52:       clock_gettime(CLOCK_MONOTONIC, &end_time);
+     .      .   53:       m_time_cum += 1000000000L * (end_time.tv_sec - start_time.tv_sec) + end_time.tv_nsec - start_time.tv_nsec;
+     .      .   54:     }
+     .      .   55:     //sync opt
+     .      .   56:     else if(opt_sync == 's'){
+   201    201   57:       while(__sync_lock_test_and_set(lock + hashing_index, 1));
+     .      .   58:     }
+     .     72   59:     SortedList_insert(top + hashing_index, (elems + i));
+     .      .   60:     //__sync_lock_release(lock + hashing_index);
+     .      .   61:     if(opt_sync == 'm'){
+     .      .   62:       pthread_mutex_unlock(mutex + hashing_index);
+     .      .   63:     }
+     .      .   64:     else if(opt_sync == 's'){
+     .      .   65:       __sync_lock_release(lock + hashing_index);
+     .      .   66:     }
+     .      .   67:     //default
+     .      .   68:     /*   else{
+     .      .   69: 	 SortedList_insert(top, (elems+i)); 
+     .      .   70: 	 }*/
+     .      .   71:   }
+     .      .   72: 
+     .      .   73: 
+     .      .   74:   //locks for lists
+     .      .   75:   for(i = 0; i < nlists; i++){
+     .      .   76:     if(opt_sync == 'm'){
+     .      .   77:       clock_gettime(CLOCK_MONOTONIC,&start_time);
+     .      .   78:       pthread_mutex_lock(mutex + i);
+     .      .   79:       clock_gettime(CLOCK_MONOTONIC,&end_time);
+     .      .   80:       m_time_cum += 1000000000L * (end_time.tv_sec - start_time.tv_sec) + end_time.tv_nsec - start_time.tv_nsec;
+     .      .   81:     }
+     .      .   82:     else if(opt_sync == 's'){
+     .      .   83:       while(__sync_lock_test_and_set(lock + i, 1));
+     .      .   84:     }
+     .      .   85:   }
+     .      .   86: 
+     .      .   87:   long list_length = 0;  
+     .      .   88:   
+     .      .   89:   for(i = 0; i < nlists; i++){
+     .      .   90:     list_length += SortedList_length(top + i);
+     .      .   91:   }
+     .      .   92:   
+     .      .   93:   //lock list release boi
+     .      .   94:   for(i = 0; i < nlists; i++){
+     .      .   95:     if(opt_sync == 'm'){
+     .      .   96:       pthread_mutex_unlock(mutex + i);
+     .      .   97:     }
+     .      .   98:     else if(opt_sync == 's'){
+     .      .   99:       __sync_lock_release(lock + i);
+     .      .  100:     }
+     .      .  101:   }
+     .      .  102: 
+     .      .  103:   char* checker = malloc(sizeof(char) * 6); // CHANGE NUM
+     .      .  104:   //The lookup+delete
+     .      .  105:   SortedListElement_t *visited;
+     .      .  106:   int deleted;
+     .      .  107: 
+     .      .  108:   for (i = t_num * niter; i < end; i++)
+     .      .  109:     {
+     .      .  110:       unsigned int hashing_index = hash((elems+i)->key) % nlists;
+     .      .  111:       strcpy(checker, (elems+i)->key);
+     .      .  112:       // Mutex lock
+     .      .  113:       if (opt_sync == 'm'){
+     .      .  114: 	clock_gettime(CLOCK_MONOTONIC, &start_time);
+     .      .  115: 	pthread_mutex_lock(mutex + hashing_index);
+     .      .  116: 	//visited = SortedList_lookup(top, (elems + i)->key);
+     .      .  117: 	//pthread_mutex_unlock(&mutex);
+     .      .  118: 	//pthread_mutex_lock(muitex + hashing_index);
+     .      .  119: 	//deleted = SortedList_delete(visited);
+     .      .  120: 	//pthread_mutex_unlock(&mutex);
+     .      .  121: 	clock_gettime(CLOCK_MONOTONIC, &end_time);
+     .      .  122: 	m_time_cum += 1000000000L * (end_time.tv_sec - start_time.tv_sec) + end_time.tv_nsec - start_time.tv_nsec;
+     .      .  123:       }
+     .      .  124:       else if (opt_sync == 's'){
+   105    105  125: 	while (__sync_lock_test_and_set(lock + hashing_index, 1));
+     .      .  126:       }
+     .     53  127:       visited = SortedList_lookup(top + hashing_index, checker);
+     .      .  128:       
+     .      .  129:       if(opt_sync == 'm'){
+     .      .  130: 	pthread_mutex_unlock(mutex + hashing_index);
+     .      .  131:       }
+     .      .  132:       else if(opt_sync == 's'){
+     .      .  133: 	__sync_lock_release(lock + hashing_index);
+     .      .  134:       }
+     .      .  135:       /*__sync_lock_release(&lock);
+     .      .  136:         while (__sync_lock_test_and_set(&lock, 1));
+     .      .  137: 	deleted = SortedList_delete(visited);
+     .      .  138:         __sync_lock_release(&lock);
+     .      .  139: 	}
+     .      .  140:       else {
+     .      .  141:       visited = SortedList_lookup(top, (elems + i)->key);
+     .      .  142:       deleted = SortedList_delete(visited);
+     .      .  143:       }*/
+     .      .  144:       if(visited == NULL){
+     .      .  145: 	fprintf(stderr, "Error with looking at list\n");
+     .      .  146: 	exit(2);
+     .      .  147:       }
+     .      .  148: 
+     .      .  149:       if(opt_sync == 'm'){
+     .      .  150: 	clock_gettime(CLOCK_MONOTONIC, &start_time);
+     .      .  151: 	pthread_mutex_lock(mutex + hashing_index);
+     .      .  152: 	clock_gettime(CLOCK_MONOTONIC, &end_time);
+     .      .  153: 	m_time_cum += 1000000000L * (end_time.tv_sec - start_time.tv_sec) + end_time.tv_nsec - start_time.tv_nsec;
+     .      .  154:       }
+     .      .  155:       else if(opt_sync == 's'){
+     3      3  156: 	while(__sync_lock_test_and_set(lock + hashing_index, 1));
+     .      .  157:       }
+     .      .  158:       deleted = SortedList_delete(visited);
+     .      .  159: 
+     .      .  160:       if(opt_sync == 'm'){
+     .      .  161: 	pthread_mutex_unlock(mutex + hashing_index);
+     .      .  162:       }
+     .      .  163:       else if(opt_sync == 's'){
+     .      .  164: 	__sync_lock_release(lock + hashing_index);
+     .      .  165:       }
+     .      .  166:       if(deleted){
+     .      .  167: 	fprintf(stderr, "Error with deleting item from list\n");
+     .      .  168: 	exit(2);
+     .      .  169:       }
+     .      .  170:     }
+     .      .  171:   return (void *) m_time_cum;
+     .      .  172: }
+---
+     .      .  173: 
+     .      .  174: int main (int argc, char** argv)
+     .      .  175: {
+     .      .  176:   int opt = 0;    // Stores the options
+     .      .  177:   int num_threads = 1;
