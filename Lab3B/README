@@ -1,0 +1,12 @@
+#NAME: Devyan Biswas
+#EMAIL: devyanbiswas@outlook.com
+#ID: #UID
+
+Makefile:
+	Clean removes all files and garbage files generated from using emacs
+	dist compiles all the files needed to pass the sanity checking script
+	default does the necessary process of linking a file that runs the python script to a runable executable lab3b
+README:
+	This file...whoa...so meta
+fsCheck.py:
+	The main file that does a few necessary checks: No duplicated in inodes, no multiple references of blocks (gotten from the indirect and inode lines in the csv), and others: my comments in the code generalyl describe the important functions

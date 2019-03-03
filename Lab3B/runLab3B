@@ -1,0 +1,10 @@
+#!/bin/bash 
+if [ $# -ne 1 ]
+then
+    echo "BAD ARGUMENTS"
+    exit 1
+fi
+
+python fsCheck.py $1
+
+exit $?
