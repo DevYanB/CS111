@@ -1,0 +1,12 @@
+NAME: DEVYAN BISWAS
+EMAIL: devyanbiswas@outlook.com
+ID: #UID
+
+- Makefile: clean, dist, and default for building
+- lab4c_tcp.c: temperature and time timestamp using websocket endpoint to open a conncection to a TCP server given the hostname and port number, and send to the TCP server.
+First message send is always "ID=#ID". Errors are sent by the server, prefaces with a LOG keyword/command with the error sent back. The commands are sent by the server itself and processed by the locally running
+code.
+- lab4c_tls.c: same end goal as the above with temperature and timestamp log info. Opens the TLS connection, sends the first message with the ID, sends the subsequent messages with timestamp and temp info,
+and doing the processing and logging of the commands sent by server over the connection. TLS is a secure channel built on top of the TCP model, that's why the steps are similar with additional SSL calls for secure
+reads and writes to the server.
+- README: this one

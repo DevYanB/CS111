@@ -1,0 +1,14 @@
+NAME: Devyan Biswas
+EMAIL: devyanbiswas@outlook.com
+ID: #UID
+
+BeagleBone S/N: BBGW18031162
+MAC: 2CF7F1067889
+
+a selfie (my_beaglebone.jpg) of me holding my assembled Beaglebone (showing the front of the board).
+a screen shot (connected.png) from a USB terminal command session connected to my system, showing that I gave it a name and configured network access.
+a screen shot (copy.png) from a local session in which I copy a hello world program from my laptop/desktop to my Beaglebone.
+a screen shot (build_run.png) from a WIFI SSH session in which I build and run a trivial (hello world) program.
+a screen shot (git.png) from a WIFI SSH session in which I install git and clone a repository.
+a Makefile to build the tarball.
+a README file containing the serial number of my Beaglebone and the WiFi, MAC address, and a description of the above files.

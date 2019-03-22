@@ -1,0 +1,8 @@
+NAME: DEVYAN BISWAS
+EMAIL: devyanbiswas@outlook.com
+ID: #UID
+
+Makefile: clean, dist, check, and default for building
+lab4b.c: temperature and time timestamp
+README: this one
+
