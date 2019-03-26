@@ -2,6 +2,11 @@ NAME: Devyan Biswas
 EMAIL: devyanbiswas@outlook.com
 ID: #UID
 
+IMPORTANT NOTE:
+Got an 84 on this lab for this reason:
+For cases where sync wasn't used, did not print out 8th column. To resolve this,
+simply make sure that the number being calculated is in fact elapsed time and that for trivial(in this case, non-sync and non-lock tests) it is 0. Note that the testing script does NOT check for that.
+
 --------------------------------------------------------------------------------------------------------
 DESCRIPTION
 --------------------------------------------------------------------------------------------------------
